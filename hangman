@@ -1,0 +1,120 @@
+from movies import *
+from random import choice
+
+
+def generate_underscore(movie_string):
+    """
+    function produces list of underscored version of word where each character
+    in the movie is represented by a dash, but the spaces as kept as spaces
+    :param movie_string: (str) the movie being guessed
+    :return: (lst) a list representing the underscored version of the word
+    """
+    # empty list where dashes and spaces will appear
+    list_of_movies = []
+
+    # for each character and space in movie string, there appears a dash or space
+    for i in movie_string:
+        if i == " ":
+            # adding space to list
+            list_of_movies.append(" ")
+            # adds dash to list
+        else:
+            list_of_movies.append("-")
+    return list_of_movies
+
+
+def list_to_string(lst_of_str):
+    """
+    function produces a list of strings with accurate spacing
+    :param lst_of_str: (lst) list of strings
+    :return: (str) the letters in list as a single string with capitalized letters and spacing
+    """
+    # signifies that the new created list has to be a string
+    new_lst = ""
+    # for loop used to repeat the conversion of list into a string with capitalized letters and spaces
+    for elem in lst_of_str:
+        new_lst = new_lst + elem.upper() + " "
+    # omits last space
+    return new_lst[:-1]
+
+
+def insert_letter(letter_guess, guess_list, movie_guess):
+    """
+    the function updates list of dashes with guessed letters in a new list
+    :param letter_guess: (str) the guessed letter
+    :param guess_list: (lst) list of strings representing the current dashed version the user has filled in
+    :param movie_guess: (str) the movie being guessed
+    :return: (lst) a new list with updated guesses and dashes
+    """
+    # index and increment until movie is guessed
+    # for loop used to evaluate each character in movie guess (the title)
+    for i in range(len(movie_guess)):
+        # for any index in movie guess, if letter guessed in any index, replaces with letter
+        if movie_guess[i] == letter_guess:
+            # replaces dash index in guess_list with the letter we guess
+            guess_list[i] = letter_guess
+    return guess_list
+
+
+def play_hangman():
+    """
+    function initiates the hangman game using previous functions and runs until the game is finished
+    """
+    # randomly chooses a movie with its description and year
+    (title, desc, year) = choice(get_movies())
+
+    # displays information needed to guess the movie title
+    print("***" + " Movie Hangman " + "***")
+    print("Year: " + year)
+    print(desc)
+
+    # generates amount of underscores needed for title
+    movie_dash = generate_underscore(title.title())
+    # empty list where any guessed letter goes
+    guessed_letter_list = []
+    # list that will be updated as guesses are made
+    updated_list = generate_underscore(title)
+    # initializes the amount of wrong guesses that will be counted
+    wrong_guess = 0
+    # checks if updated list has any underscores
+    # while underscores are present, game continues to run
+    checking = True
+    # user only allowed to have 8 wrong guesses before game terminates
+    allowed_wrong_guess = 8
+
+    # while loop used to keep track of dashes and continues if user has not reached limit of wrong guesses
+    while checking and allowed_wrong_guess != 0:
+        print("-" * 20)
+        # turns list of guessed letters into a string of letters
+        print("Guessed letters: " + list_to_string(guessed_letter_list))
+        # turns list of dashes into string with appropriate spacing
+        print("Movie: " + list_to_string(updated_list))
+        # tells user how many wrong guesses they are allowed to make
+        print("You have " + str(allowed_wrong_guess) + " guesses")
+        # while prompting user, displays specified information
+        user_input = input("Guess a letter: ")
+        user_input = user_input.lower()
+        # if else statement used to set conditions when letter has been guessed
+        if user_input in guessed_letter_list:
+            # displays statement when guess is repeated
+            print("You have already guessed this letter")
+        else:
+            if user_input not in title:
+                # counts wrong guesses
+                wrong_guess += 1
+                # deducts number of wrong guesses
+                allowed_wrong_guess -= 1
+            # adds user input to list of guessed letters
+            guessed_letter_list.append(user_input)
+            # inserts letter into appropriate place in dash list
+            updated_list = insert_letter(user_input, movie_dash, title)
+
+        # when dashes no longer exist, reports stats of game to user and terminates
+        if not ("-" in updated_list):
+            checking = False
+            print("You win!" + "\n" + "The movie was: " + title.title() + "\n" + "You guessed it with "
+                  + str(len(guessed_letter_list)) + " guesses" + "\n" + "You had " + str(wrong_guess)
+                  + " wrong guesses.")
+    # when user runs of amount of wrong guesses, displays specified info and game finishes
+    if allowed_wrong_guess == 0:
+        print("You ran out of guesses. You lose!")
